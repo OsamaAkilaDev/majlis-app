@@ -1,0 +1,36 @@
+{
+  "name": "@majlis/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants.d.ts",
+      "import": "./dist/esm/constants.js",
+      "require": "./dist/constants.js"
+    },
+    "./problem": {
+      "types": "./dist/common/problem.d.ts",
+      "import": "./dist/esm/common/problem.js",
+      "require": "./dist/common/problem.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "//constants": "./constants is a zero-import subpath and ./problem imports only zod. The barrel re-exports all fifteen schema modules, and the bundler does not tree-shake through it, so a browser module that reads one value from '@majlis/contracts' ships every schema. Both subpaths exist for exactly that reason; the barrel still exports everything they hold.",
+  "//sideEffects": "Nothing here runs on import: every export is a Zod schema or a constant. Saying so is what lets a bundler drop the ~40 schemas the web app never touches, instead of shipping all of zod plus this barrel to every route.",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.esm.json && node -e \"require('node:fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
+  },
+  "dependencies": { "zod": "4.5.4" },
+  "devDependencies": { "@types/node": "22.14.0", "typescript": "5.9.3", "vitest": "5.0.0" }
+}

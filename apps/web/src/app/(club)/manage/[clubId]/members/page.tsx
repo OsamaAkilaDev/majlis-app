@@ -1,0 +1,24 @@
+import type { ClubDetail, MemberList } from '@majlis/contracts';
+import type { Metadata } from 'next';
+import { serverFetch } from '@/lib/server-api';
+import { MembersManager } from '@/components/club/MembersManager';
+
+export const metadata: Metadata = { title: 'Members' };
+
+export default async function MembersPage({ params }: { params: Promise<{ clubId: string }> }) {
+  const { clubId } = await params;
+  const [club, pending, active] = await Promise.all([
+    serverFetch<ClubDetail>(`/clubs/${clubId}`),
+    serverFetch<MemberList>(`/clubs/${clubId}/members?status=PENDING`),
+    serverFetch<MemberList>(`/clubs/${clubId}/members?status=ACTIVE`),
+  ]);
+
+  return (
+    <MembersManager
+      clubId={clubId}
+      initialClub={club}
+      initialPending={pending}
+      initialActive={active}
+    />
+  );
+}

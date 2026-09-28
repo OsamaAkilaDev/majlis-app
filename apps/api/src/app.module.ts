@@ -1,0 +1,63 @@
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { LoggerModule } from 'nestjs-pino';
+import { AuditModule } from './audit/audit.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { AuthModule } from './auth/auth.module';
+import { CertificatesModule } from './certificates/certificates.module';
+import { ClubsModule } from './clubs/clubs.module';
+import { RequestContextModule } from './common/request-context.module';
+import { resolveRequestId } from './common/request-id';
+import { ConfigModule } from './config/config.module';
+import type { Env } from './config/env.schema';
+import { LOG_REDACT_PATHS, redactedReqSerializer } from './config/log-redaction';
+import { DepartmentsModule } from './departments/departments.module';
+import { EventsModule } from './events/events.module';
+import { HealthModule } from './health/health.module';
+import { ReportingModule } from './reporting/reporting.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { StorageModule } from './storage/storage.module';
+import { UsersModule } from './users/users.module';
+
+@Module({
+  imports: [
+    ConfigModule,
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => ({
+        pinoHttp: {
+          level: config.get('LOG_LEVEL', { infer: true }),
+          // Fallback for a bootstrap path that skips configureApp(); inert otherwise. Not dead code.
+          genReqId: (req, res) => {
+            const id = resolveRequestId(req.headers['x-request-id']);
+            res.setHeader('x-request-id', id);
+            return id;
+          },
+          // Nothing secret ever reaches a log line.
+          redact: { paths: [...LOG_REDACT_PATHS], remove: true },
+          serializers: { req: redactedReqSerializer },
+          transport:
+            config.get('NODE_ENV', { infer: true }) === 'development'
+              ? { target: 'pino-pretty', options: { singleLine: true } }
+              : undefined,
+        },
+      }),
+    }),
+    RequestContextModule,
+    PrismaModule,
+    AuditModule,
+    NotificationsModule,
+    AuthModule,
+    UsersModule,
+    DepartmentsModule,
+    ClubsModule,
+    EventsModule,
+    AttendanceModule,
+    CertificatesModule,
+    HealthModule,
+    ReportingModule,
+    StorageModule,
+  ],
+})
+export class AppModule {}

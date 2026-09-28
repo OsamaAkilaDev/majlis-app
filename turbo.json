@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "env": ["API_ORIGIN"], "outputs": ["dist/**", ".next/**", "!.next/cache/**"] },
+    "typecheck": { "dependsOn": ["^build"] },
+    "lint": {},
+    "test": { "dependsOn": ["^build"] },
+    "test:integration": { "dependsOn": ["^build"], "cache": false },
+    "test:acceptance": { "dependsOn": ["^build"], "cache": false }
+  }
+}

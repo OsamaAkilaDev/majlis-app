@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+test-results/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+apps/api/src/generated/
+.DS_Store
+
+# Next rewrites this between dev and build; it regenerates on demand
+apps/web/next-env.d.ts

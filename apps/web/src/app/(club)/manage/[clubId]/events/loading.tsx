@@ -1,0 +1,13 @@
+import { Bar, TableSkeleton } from '@/components/shell/skeleton-parts';
+
+export default function Loading() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Bar className="h-9 w-full rounded-control sm:w-64" />
+        <Bar className="h-9 w-36 rounded-control" />
+      </div>
+      <TableSkeleton rows={8} cols={5} />
+    </div>
+  );
+}
